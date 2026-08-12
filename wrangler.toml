@@ -1,0 +1,16 @@
+name = "thinkshopstore"
+main = "worker.js"
+compatibility_date = "2026-08-12"
+
+[assets]
+directory = "."
+binding = "ASSETS"
+run_worker_first = ["/api/*"]
+
+# D1 is already bound in the Cloudflare dashboard as DB.
+# Do not add a second D1 binding here unless you replace the placeholder below
+# with the real database_id from Cloudflare.
+# [[d1_databases]]
+# binding = "DB"
+# database_name = "thinkshop-db"
+# database_id = "PASTE_REAL_DATABASE_ID_HERE"
