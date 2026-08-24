@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>مدیریت ThinkShop</title>
+<style>
+:root{--bg:#120b1d;--card:#21132f;--card2:#2b1940;--line:#4a315d;--text:#fff;--muted:#c9b8d2;--pink:#ff78b7;--green:#55d98b;--red:#ff6b7a}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(145deg,#10091a,#1b102b);color:var(--text);font-family:Tahoma,Arial,sans-serif}button,input,textarea,select{font:inherit}a{color:inherit;text-decoration:none}.wrap{max-width:1200px;margin:auto;padding:22px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:20px}.brand{font-size:1.35rem;font-weight:900}.brand span{color:var(--pink)}.btn{border:0;border-radius:12px;padding:11px 16px;cursor:pointer;font-weight:800}.primary{background:var(--pink);color:#251329}.dark{background:var(--card2);color:#fff;border:1px solid var(--line)}.danger{background:var(--red);color:#260812}.hidden{display:none!important}.card{background:rgba(33,19,47,.94);border:1px solid var(--line);border-radius:20px;padding:20px;box-shadow:0 15px 40px rgba(0,0,0,.18)}.login{max-width:430px;margin:9vh auto}.title{font-size:1.5rem;font-weight:900;margin-bottom:8px}.sub{color:var(--muted);line-height:1.9;margin-bottom:18px}.field{margin-bottom:14px}.field label{display:block;color:var(--muted);font-size:.86rem;margin-bottom:7px}.field input,.field textarea,.field select{width:100%;background:#160d24;color:#fff;border:1px solid var(--line);border-radius:11px;padding:12px;outline:0}.field textarea{min-height:120px;resize:vertical}.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--pink)}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.checks{display:flex;gap:18px;flex-wrap:wrap;color:var(--muted)}.checks label{display:flex;gap:7px;align-items:center}.toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:15px}.products{display:grid;gap:10px}.row{display:grid;grid-template-columns:70px 1fr auto;gap:13px;align-items:center;background:#170e25;border:1px solid var(--line);border-radius:15px;padding:10px}.thumb{width:70px;height:70px;border-radius:11px;overflow:hidden;background:#2c1944;display:flex;align-items:center;justify-content:center}.thumb img{width:100%;height:100%;object-fit:cover}.pname{font-weight:900;margin-bottom:5px}.meta{color:var(--muted);font-size:.8rem;line-height:1.8}.actions{display:flex;gap:7px;flex-wrap:wrap}.message{padding:11px 13px;border-radius:11px;margin:12px 0;display:none}.message.show{display:block}.ok{background:rgba(85,217,139,.12);color:#91f0b2;border:1px solid rgba(85,217,139,.25)}.err{background:rgba(255,107,122,.12);color:#ff9da8;border:1px solid rgba(255,107,122,.25)}.modal{position:fixed;inset:0;background:rgba(0,0,0,.68);display:none;align-items:center;justify-content:center;padding:18px;z-index:20}.modal.show{display:flex}.modalbox{width:min(700px,100%);max-height:92vh;overflow:auto}.small{font-size:.78rem;color:var(--muted)}@media(max-width:700px){.grid{grid-template-columns:1fr}.row{grid-template-columns:58px 1fr}.row .actions{grid-column:1/-1}.thumb{width:58px;height:58px}.top{align-items:flex-start;flex-direction:column}}
+</style>
+</head>
+<body>
+<div id="loginView" class="wrap">
+  <div class="card login">
+    <div class="title">🔐 مدیریت <span style="color:var(--pink)">ThinkShop</span></div>
+    <div class="sub">برای ورود به پنل مدیریت، رمز مدیریتی که در Cloudflare تنظیم کرده‌ای را وارد کن.</div>
+    <div id="loginMsg" class="message"></div>
+    <form id="loginForm">
+      <div class="field"><label>رمز مدیریت</label><input id="password" type="password" autocomplete="current-password" required autofocus></div>
+      <button class="btn primary" style="width:100%">ورود به پنل</button>
+    </form>
+  </div>
+</div>
+
+<div id="app" class="wrap hidden">
+  <div class="top">
+    <div><div class="brand">پنل مدیریت <span>ThinkShop</span></div><div class="small">مدیریت واقعی محصولات از طریق Cloudflare D1</div></div>
+    <div class="actions"><a class="btn dark" href="/">مشاهده فروشگاه</a><button id="logoutBtn" class="btn danger">خروج</button></div>
+  </div>
+
+  <div id="msg" class="message"></div>
+  <div class="card" style="margin-bottom:16px">
+    <div class="toolbar"><div><strong>محصولات</strong><div class="small">هر محصولی که اینجا ثبت شود روی سایت نمایش داده می‌شود.</div></div><button id="newBtn" class="btn primary">＋ افزودن محصول</button></div>
+    <div id="products" class="products"></div>
+  </div>
+
+  <div class="card" style="margin-bottom:16px">
+    <div class="toolbar"><div><strong>اطلاعات فروشگاه</strong><div class="small">درباره ما، تماس، قوانین خرید و حریم خصوصی از اینجا مستقیماً روی سایت تغییر می‌کنند.</div></div><button id="saveInfoBtn" class="btn primary">ذخیره اطلاعات</button></div>
+    <div id="infoMsg" class="message"></div>
+    <div class="grid">
+      <div class="field"><label>درباره ما</label><textarea id="aboutInfo"></textarea></div>
+      <div class="field"><label>متن تماس با ما</label><textarea id="contactInfo"></textarea></div>
+      <div class="field"><label>شماره تماس</label><input id="phoneInfo" type="tel"></div>
+      <div class="field"><label>ایمیل</label><input id="emailInfo" type="email"></div>
+      <div class="field"><label>لینک واتساپ</label><input id="whatsappInfo" type="url" placeholder="https://wa.me/..."></div>
+      <div class="field"><label>لینک اینستاگرام</label><input id="instagramInfo" type="url" placeholder="https://instagram.com/..."></div>
+      <div class="field"><label>آدرس</label><textarea id="addressInfo"></textarea></div>
+      <div class="field"><label>قوانین خرید</label><textarea id="termsInfo"></textarea></div>
+      <div class="field"><label>حریم خصوصی</label><textarea id="privacyInfo"></textarea></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <strong>نکته</strong>
+    <div class="sub" style="margin:7px 0 0">موجودی هر محصول واقعی و جداگانه در D1 ذخیره می‌شود و بعد از ثبت سفارش نیز خودکار کم می‌شود. اطلاعات تماس و صفحات فروشگاه هم از همین پنل قابل ویرایش هستند.</div>
+  </div>
+</div>
+
+<div id="modal" class="modal"><div class="modalbox card">
+  <div class="toolbar"><strong id="modalTitle">افزودن محصول</strong><button id="closeBtn" class="btn dark">بستن</button></div>
+  <div id="formMsg" class="message"></div>
+  <form id="productForm">
+    <input type="hidden" id="pid">
+    <div class="grid">
+      <div class="field"><label>نام محصول *</label><input id="name" required></div>
+      <div class="field"><label>قیمت به تومان *</label><input id="price" type="number" min="0" required></div>
+      <div class="field"><label>موجودی واقعی *</label><input id="stock" type="number" min="0" step="1" value="0" required><div class="small" style="margin-top:5px">تعداد واقعی قابل فروش این محصول. بعد از هر سفارش به‌صورت خودکار کم می‌شود.</div></div>
+      <div class="field"><label>نوع نمایش</label><select id="type"><option value="منتخب">منتخب Thinkshop</option><option value="پرفروش">پرفروش‌ها</option><option value="فروشگاه">فروشگاه</option></select></div>
+      <div class="field"><label>عنوان روی تصویر</label><input id="cover" placeholder="ThinkShop"></div>
+    </div>
+    <div class="field">
+      <label>عکس محصول</label>
+      <input id="image" type="url" placeholder="https://.../product.jpg">
+      <div class="small" style="margin-top:7px">یا عکس را مستقیم از گالری گوشی انتخاب کن:</div>
+      <input id="imageFile" type="file" accept="image/*" style="margin-top:8px">
+      <div id="imagePreview" style="display:none;margin-top:10px">
+        <img id="imagePreviewImg" alt="پیش‌نمایش عکس محصول" style="width:120px;height:120px;object-fit:cover;border-radius:14px;border:1px solid var(--line);background:#160d24">
+      </div>
+    </div>
+    <div class="field"><label>توضیحات محصول</label><textarea id="desc"></textarea></div>
+    <div class="grid">
+      <div class="field"><label>امتیاز</label><input id="rating" value="۵.۰"></div>
+      <div class="field"><label>تعداد نظرات</label><input id="reviews" value="۰"></div>
+    </div>
+    <div class="checks">
+      <label><input id="featured" type="checkbox"> محصول منتخب</label>
+      <label><input id="best" type="checkbox"> پرفروش</label>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:18px"><button class="btn primary" type="submit">ذخیره محصول</button><button id="cancelBtn" type="button" class="btn dark">انصراف</button></div>
+  </form>
+</div></div>
+
+<script>
+const $=s=>document.querySelector(s);
+let products=[];
+function msg(el,text,ok=false){el.textContent=text;el.className='message show '+(ok?'ok':'err')}
+function clearMsg(el){el.className='message';el.textContent=''}
+async function api(url,opts={}){const token=sessionStorage.getItem('thinkshop_admin_token')||'';const headers={'Content-Type':'application/json',...(opts.headers||{})};if(token&&!headers.Authorization)headers.Authorization='Bearer '+token;const r=await fetch(url,{credentials:'same-origin',cache:'no-store',...opts,headers});let d={};try{d=await r.json()}catch{};if(!r.ok||d.ok===false)throw new Error(d.error||'خطای سرور');return d}
+async function checkAuth(){try{await api('/api/admin/me');showApp();await Promise.all([load(),loadSiteInfo()])}catch{showLogin()}}
+function showLogin(){$('#loginView').classList.remove('hidden');$('#app').classList.add('hidden')}
+function showApp(){$('#loginView').classList.add('hidden');$('#app').classList.remove('hidden')}
+function fa(n){return String(n).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d])}
+function money(n){return fa(Number(n).toLocaleString('en-US'))+' تومان'}
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+async function load(){const d=await api('/api/products');products=d.products||[];renderProducts()}
+function renderProducts(){
+ $('#products').innerHTML=products.length?products.map(p=>`<div class="row"><div class="thumb">${p.image?`<img src="${esc(p.image)}" onerror="this.style.display='none'">`:'🎲'}</div><div><div class="pname">${esc(p.name)}</div><div class="meta">${money(p.price)} · موجودی: <b>${fa(p.stock||0)}</b> · ${esc(p.type||'فروشگاه')} · ${p.featured?'منتخب ':''}${p.best?'پرفروش':''}</div></div><div class="actions"><button class="btn dark" onclick="editProduct(${p.id})">ویرایش</button><button class="btn danger" onclick="deleteProduct(${p.id})">حذف</button></div></div>`).join(''):'<div class="sub" style="margin:0">محصولی وجود ندارد.</div>';
+}
+function openForm(p=null){
+ clearMsg($('#formMsg'));$('#modal').classList.add('show');$('#modalTitle').textContent=p?'ویرایش محصول':'افزودن محصول';
+  $('#pid').value=p?.id||'';$('#name').value=p?.name||'';$('#price').value=p?.price??'';$('#stock').value=Number.isFinite(Number(p?.stock))?Number(p.stock):0;$('#type').value=p?.type||'منتخب';$('#cover').value=p?.cover||'ThinkShop';$('#image').value=p?.image||'';$('#imageFile').value='';$('#imagePreview').style.display=p?.image?'block':'none';$('#imagePreviewImg').src=p?.image||'';$('#desc').value=p?.desc||'';$('#rating').value=p?.rating||'۵.۰';$('#reviews').value=p?.reviews||'۰';$('#featured').checked=!!(p?.featured||(p?.type==='منتخب'));$('#best').checked=!!(p?.best||(p?.type==='پرفروش'));setTimeout(()=>$('#name').focus(),50)
+}
+window.editProduct=id=>openForm(products.find(p=>Number(p.id)===Number(id)));
+window.deleteProduct=async id=>{const p=products.find(x=>Number(x.id)===Number(id));if(!p)return;if(!confirm('محصول «'+p.name+'» حذف شود؟'))return;try{await api('/api/products?id='+encodeURIComponent(id),{method:'DELETE'});msg($('#msg'),'محصول حذف شد.',true);await load()}catch(e){msg($('#msg'),e.message)}};
+$('#newBtn').onclick=()=>openForm();$('#closeBtn').onclick=$('#cancelBtn').onclick=()=>$('#modal').classList.remove('show');
+async function fileToOptimizedDataUrl(file){
+  if(!file)return '';
+  if(!file.type.startsWith('image/'))throw new Error('لطفاً یک فایل تصویری انتخاب کن.');
+  if(file.size>8*1024*1024)throw new Error('حجم عکس بیشتر از ۸ مگابایت است.');
+  const raw=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>reject(new Error('خواندن عکس ناموفق بود.'));r.readAsDataURL(file)});
+  const img=await new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=()=>reject(new Error('باز کردن عکس ناموفق بود.'));im.src=raw});
+  const maxSide=900,scale=Math.min(1,maxSide/Math.max(img.naturalWidth||img.width,img.naturalHeight||img.height));
+  const w=Math.max(1,Math.round((img.naturalWidth||img.width)*scale)),h=Math.max(1,Math.round((img.naturalHeight||img.height)*scale));
+  const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);
+  for(const q of [0.78,0.68,0.58,0.48]){const data=c.toDataURL('image/webp',q);if(data.length<=500000)return data}
+  const jpeg=c.toDataURL('image/jpeg',0.45);if(jpeg.length<=500000)return jpeg;
+  throw new Error('این عکس بعد از فشرده‌سازی هنوز بزرگ است؛ یک عکس کوچک‌تر انتخاب کن.');
+}
+$('#imageFile').addEventListener('change',()=>{const file=$('#imageFile').files?.[0];if(!file){$('#imagePreview').style.display=$('#image').value?'block':'none';return}const url=URL.createObjectURL(file);$('#imagePreviewImg').src=url;$('#imagePreview').style.display='block'});
+$('#productForm').onsubmit=async e=>{e.preventDefault();clearMsg($('#formMsg'));const id=$('#pid').value;try{let image=$('#image').value.trim();const selectedFile=$('#imageFile').files?.[0];if(selectedFile){msg($('#formMsg'),'در حال آماده‌سازی عکس...',true);image=await fileToOptimizedDataUrl(selectedFile)}const p={name:$('#name').value.trim(),price:Number($('#price').value),stock:Number($('#stock').value),type:$('#type').value,cover:$('#cover').value.trim()||'ThinkShop',image,desc:$('#desc').value.trim(),rating:$('#rating').value.trim()||'۵.۰',reviews:$('#reviews').value.trim()||'۰',featured:$('#featured').checked,best:$('#best').checked};if(!p.name||!Number.isFinite(p.price)||p.price<0||!Number.isInteger(p.stock)||p.stock<0)throw new Error('نام، قیمت و موجودی را درست وارد کن.');await api('/api/products',{method:id?'PUT':'POST',body:JSON.stringify(id?{...p,id:Number(id)}:p)});$('#modal').classList.remove('show');msg($('#msg'),id?'محصول ویرایش شد.':'محصول با موفقیت ثبت شد.',true);await load()}catch(e){msg($('#formMsg'),e.message)}};
+async function loadSiteInfo(){
+  try{const d=await api('/api/site-info');const i=d.info||{};$('#aboutInfo').value=i.about||'';$('#contactInfo').value=i.contact||'';$('#phoneInfo').value=i.phone||'';$('#emailInfo').value=i.email||'';$('#whatsappInfo').value=i.whatsapp||'';$('#instagramInfo').value=i.instagram||'';$('#addressInfo').value=i.address||'';$('#termsInfo').value=i.terms||'';$('#privacyInfo').value=i.privacy||'';}catch(e){msg($('#infoMsg'),e.message)}
+}
+$('#saveInfoBtn').onclick=async()=>{try{await api('/api/site-info',{method:'PUT',body:JSON.stringify({about:$('#aboutInfo').value,contact:$('#contactInfo').value,phone:$('#phoneInfo').value,email:$('#emailInfo').value,whatsapp:$('#whatsappInfo').value,instagram:$('#instagramInfo').value,address:$('#addressInfo').value,terms:$('#termsInfo').value,privacy:$('#privacyInfo').value})});msg($('#infoMsg'),'اطلاعات فروشگاه با موفقیت ذخیره شد.',true)}catch(e){msg($('#infoMsg'),e.message)}};
+
+$('#loginForm').onsubmit=async e=>{e.preventDefault();clearMsg($('#loginMsg'));try{const d=await api('/api/admin/login',{method:'POST',body:JSON.stringify({password:$('#password').value})});if(!d.token)throw new Error('ورود مدیریت کامل نشد.');sessionStorage.setItem('thinkshop_admin_token',d.token);$('#password').value='';showApp();await Promise.all([load(),loadSiteInfo()])}catch(e){sessionStorage.removeItem('thinkshop_admin_token');msg($('#loginMsg'),e.message)}};
+$('#logoutBtn').onclick=async()=>{try{await api('/api/admin/logout',{method:'POST'})}catch{}sessionStorage.removeItem('thinkshop_admin_token');showLogin()};
+checkAuth();
+</script>
+</body>
+</html>
